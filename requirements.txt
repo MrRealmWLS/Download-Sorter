@@ -1,0 +1,9 @@
+# Download Sorter Requirements
+#
+# This script uses only built-in Python libraries:
+# - os: for path manipulation and file operations
+# - shutil: for file moving operations
+# - asyncio: for asynchronous file processing
+#
+# No external packages are required to run this script.
+# Python 3.7+ is recommended for full asyncio support.
