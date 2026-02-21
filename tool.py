@@ -1,11 +1,9 @@
 import os
 import shutil
-import hashlib
 import asyncio
-import aiofiles
 
 DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
-DRY_RUN = True
+DRY_RUN = False
 CONCURRENT_FILES = 150
 
 FILE_TYPES = {
@@ -17,8 +15,9 @@ FILE_TYPES = {
     ".mp3": "Music", ".wav": "Music", ".ogg": "Music"
 }
 
-seen_hashes = set()
+PREDEFINED_FOLDERS = set(FILE_TYPES.values())
 semaphore = asyncio.Semaphore(CONCURRENT_FILES)
+
 
 async def move_file(file_path, target_folder):
     fn = os.path.basename(file_path)
@@ -48,12 +47,20 @@ async def process_file(fn):
         await move_file(path, folder)
 
 
+async def move_all_folders():
+    for entry in os.listdir(DOWNLOADS_PATH):
+        full_path = os.path.join(DOWNLOADS_PATH, entry)
+        if os.path.isdir(full_path) and entry not in PREDEFINED_FOLDERS and entry != "Folders":
+            await move_file(full_path, "Folders")
+
+
 async def organize_downloads():
     if not os.path.exists(DOWNLOADS_PATH):
         print("Downloads folder not found!")
         return
     files = [f for f in os.listdir(DOWNLOADS_PATH) if os.path.isfile(os.path.join(DOWNLOADS_PATH, f))]
     await asyncio.gather(*(process_file(f) for f in files))
+    await move_all_folders()
     print("Downloads organized successfully!")
 
 
